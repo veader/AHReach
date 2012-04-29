@@ -40,7 +40,7 @@ typedef void (^AHReachChangedBlock)(AHReachRoutes availableRoutes);
 @interface AHReach : NSObject
 
 + (AHReach *)reachForHost:(NSString *)host;
-+ (AHReach *)reachForAddr:(const struct sockaddr_in *)addr;
++ (AHReach *)reachForAddress:(const struct sockaddr_in *)addr;
 + (AHReach *)reachForDefaultHost;
 
 - (AHReachRoutes)availableRoutes;

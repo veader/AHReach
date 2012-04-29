@@ -47,7 +47,7 @@ void AHReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabili
 	return [[AHReach alloc] initWithReachability:reachabilityRef];
 }
 
-+ (AHReach *)reachForAddr:(const struct sockaddr_in *)addr {
++ (AHReach *)reachForAddress:(const struct sockaddr_in *)addr {
 	SCNetworkReachabilityRef reachabilityRef = SCNetworkReachabilityCreateWithAddress(NULL, (const struct sockaddr *)addr);
 	return [[AHReach alloc] initWithReachability:reachabilityRef];
 }
@@ -59,14 +59,12 @@ void AHReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabili
 #pragma mark - Object lifetime
 
 - (id)initWithReachability:(SCNetworkReachabilityRef)reachabilityRef {
-	if((self = [super init])) {
+	if((self = [super init]) && reachabilityRef) {
 		reachability = reachabilityRef;
-	}
-	
-	if(reachability)
 		return self;
-	else
-		return nil;
+	}
+
+	return nil;
 }
 
 - (void)dealloc {

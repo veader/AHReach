@@ -31,7 +31,7 @@ You can incorporate AHReach into your project by copy-pasting `AHReach.h` and `A
 	addr.sin_port = htons(80);	
 	inet_aton("173.194.43.0", &addr.sin_addr);
 
-	AHReach *addressReach = [AHReach reachForAddr:&addr];
+	AHReach *addressReach = [AHReach reachForAddress:&addr];
 	[addressReach startUpdatingWithBlock:^(AHReachRoutes availableRoutes) {
 		if(availableRoutes & AHReachRouteWiFi)
 			NSLog(@"Can reach Google via WiFi");
