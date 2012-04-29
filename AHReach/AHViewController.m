@@ -1,34 +1,88 @@
 //
 //  AHViewController.m
-//  AHReach
 //
-//  Created by Warren Moore on 4/29/12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//	Copyright (c) 2012 Auerhaus Development, LLC
+//  
+//	Permission is hereby granted, free of charge, to any person obtaining a 
+//  copy of this software and associated documentation files (the "Software"), 
+//  to deal in the Software without restriction, including without limitation 
+//  the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+//  and/or sell copies of the Software, and to permit persons to whom the 
+//  Software is furnished to do so, subject to the following conditions:
 //
+//	The above copyright notice and this permission notice shall be included 
+//  in all copies or substantial portions of the Software.
+//
+//	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+//  IN THE SOFTWARE.
+//  
 
 #import "AHViewController.h"
+#import "AHReach.h"
 
 @interface AHViewController ()
-
+@property(nonatomic, strong) IBOutlet UITextField *defaultHostField;
+@property(nonatomic, strong) IBOutlet UITextField *hostField;
+@property(nonatomic, strong) IBOutlet UITextField *addressField;
+@property(nonatomic, strong) NSArray *reaches;
 @end
 
 @implementation AHViewController
 
-- (void)viewDidLoad
-{
+@synthesize defaultHostField, hostField, addressField, reaches;
+
+- (void)viewDidLoad {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+	
+	defaultHostField.text = @"<No updates yet>";
+	hostField.text = @"<No updates yet>";
+	addressField.text = @"<No updates yet>";
+	
+	AHReach *defaultHostReach = [AHReach reachForDefaultHost];
+	[defaultHostReach startUpdatingWithBlock:^(AHReachRoutes availableRoutes) {
+		[self updateAvailabilityField:self.defaultHostField withRoutes:availableRoutes];
+	}];
+	[self updateAvailabilityField:self.defaultHostField withRoutes:[defaultHostReach availableRoutes]];
+	
+	AHReach *hostReach = [AHReach reachForHost:@"auerhaus.com"];
+	[hostReach startUpdatingWithBlock:^(AHReachRoutes availableRoutes) {
+		[self updateAvailabilityField:self.hostField withRoutes:availableRoutes];
+	}];
+	[self updateAvailabilityField:self.hostField withRoutes:[hostReach availableRoutes]];
+
+	struct sockaddr_in addr;
+	memset(&addr, 0, sizeof(struct sockaddr_in));
+	addr.sin_len = sizeof(struct sockaddr_in);
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(80);	
+	inet_aton("173.194.43.0", &addr.sin_addr);
+
+	AHReach *addressReach = [AHReach reachForAddr:&addr];
+	[addressReach startUpdatingWithBlock:^(AHReachRoutes availableRoutes) {
+		[self updateAvailabilityField:self.addressField withRoutes:availableRoutes];
+	}];
+	[self updateAvailabilityField:self.addressField withRoutes:[addressReach availableRoutes]];
+	
+	self.reaches = [NSArray arrayWithObjects:defaultHostReach, hostReach, addressReach, nil];
 }
 
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
 	return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+}
+
+- (void)updateAvailabilityField:(UITextField *)field withRoutes:(AHReachRoutes)routes {
+	field.text = @"Not reachable";
+	
+	if(routes & AHReachRouteWWAN)
+		field.text = @"Available via WWAN";
+	
+	if(routes & AHReachRouteWiFi)
+		field.text = @"Available via WiFi";
 }
 
 @end

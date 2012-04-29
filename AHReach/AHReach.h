@@ -1,5 +1,5 @@
 //
-//  AHViewController.h
+//  AHReach.h
 //
 //	Copyright (c) 2012 Auerhaus Development, LLC
 //  
@@ -22,8 +22,29 @@
 //  IN THE SOFTWARE.
 //  
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
-@interface AHViewController : UIViewController
+#define kAHReachDefaultHost "apple.com"
+
+enum {
+	AHReachRouteNone = 0,
+	AHReachRouteWiFi = 1,
+	AHReachRouteWWAN = 2,
+};
+typedef NSInteger AHReachRoutes;
+
+typedef void (^AHReachChangedBlock)(AHReachRoutes availableRoutes);
+
+@interface AHReach : NSObject
+
++ (AHReach *)reachForHost:(NSString *)host;
++ (AHReach *)reachForAddr:(const struct sockaddr_in *)addr;
++ (AHReach *)reachForDefaultHost;
+
+- (AHReachRoutes)availableRoutes;
+- (void)startUpdatingWithBlock:(AHReachChangedBlock)changedBlock;
+- (void)stopUpdating;
 
 @end
