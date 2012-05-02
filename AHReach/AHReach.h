@@ -28,14 +28,9 @@
 
 #define kAHReachDefaultHost "apple.com"
 
-enum {
-	AHReachRouteNone = 0,
-	AHReachRouteWiFi = 1,
-	AHReachRouteWWAN = 2,
-};
-typedef NSInteger AHReachRoutes;
+@class AHReach;
 
-typedef void (^AHReachChangedBlock)(AHReachRoutes availableRoutes);
+typedef void (^AHReachChangedBlock)(AHReach *);
 
 @interface AHReach : NSObject
 
@@ -43,7 +38,10 @@ typedef void (^AHReachChangedBlock)(AHReachRoutes availableRoutes);
 + (AHReach *)reachForAddress:(const struct sockaddr_in *)addr;
 + (AHReach *)reachForDefaultHost;
 
-- (AHReachRoutes)availableRoutes;
+- (BOOL)isReachable;
+- (BOOL)isReachableViaWWAN;
+- (BOOL)isReachableViaWiFi;
+
 - (void)startUpdatingWithBlock:(AHReachChangedBlock)changedBlock;
 - (void)stopUpdating;
 

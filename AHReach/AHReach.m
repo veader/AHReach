@@ -29,6 +29,14 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 
+enum {
+	AHReachRouteNone = 0,
+	AHReachRouteWiFi = 1,
+	AHReachRouteWWAN = 2,
+};
+
+typedef NSInteger AHReachRoutes;
+
 @interface AHReach ()
 @property(nonatomic) SCNetworkReachabilityRef reachability;
 @property(nonatomic, copy) AHReachChangedBlock changedBlock;
@@ -107,6 +115,18 @@ void AHReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabili
 	return routes;
 }
 
+- (BOOL)isReachable {
+	return [self availableRoutes] != AHReachRouteNone;
+}
+
+- (BOOL)isReachableViaWWAN {
+	return [self availableRoutes] & AHReachRouteWWAN;
+}
+
+- (BOOL)isReachableViaWiFi {
+	return [self availableRoutes] & AHReachRouteWiFi;
+}
+
 - (void)startUpdatingWithBlock:(AHReachChangedBlock)block {
 	if(block && self.reachability) {
 		self.changedBlock = block;
@@ -120,7 +140,7 @@ void AHReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabili
 
 - (void)reachabilityDidChange {
 	if(self.changedBlock)
-		self.changedBlock([self availableRoutes]);
+		self.changedBlock(self);
 }
 
 - (void)stopUpdating {
