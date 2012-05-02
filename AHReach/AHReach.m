@@ -29,6 +29,14 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 
+enum {
+	AHReachRouteNone = 0,
+	AHReachRouteWiFi = 1,
+	AHReachRouteWWAN = 2,
+};
+
+typedef NSInteger AHReachRoutes;
+
 @interface AHReach ()
 @property(nonatomic) SCNetworkReachabilityRef reachability;
 @property(nonatomic, copy) AHReachChangedBlock changedBlock;
@@ -106,6 +114,18 @@ void AHReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabili
 	return routes;
 }
 
+- (BOOL)isReachable {
+	return [self availableRoutes] != AHReachRouteNone;
+}
+
+- (BOOL)isReachableViaWWAN {
+	return [self availableRoutes] & AHReachRouteWWAN;
+}
+
+- (BOOL)isReachableViaWiFi {
+	return [self availableRoutes] & AHReachRouteWiFi;
+}
+
 - (void)startUpdatingWithBlock:(AHReachChangedBlock)block {
 	if(block && self.reachability) {
 		self.changedBlock = block;
@@ -132,25 +152,11 @@ void AHReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabili
 	}
 }
 
-- (BOOL)notReachable {
-	return ([self availableRoutes] & AHReachRouteNone);
-}
-
-- (BOOL)reachableViaWifi {
-	return ([self availableRoutes] & AHReachRouteWiFi);
-}
-
-- (BOOL)reachableViaWWAN {
-	return ([self availableRoutes] & AHReachRouteWWAN);
-}
-
-
 @end
 
 #pragma mark - Reachability callback function
 
-void AHReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info)
-{
+void AHReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info) {
 	AHReach *reach = (__bridge AHReach *)info;
 	[reach reachabilityDidChange];
 }

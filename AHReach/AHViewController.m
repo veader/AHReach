@@ -45,15 +45,15 @@
 	
 	AHReach *defaultHostReach = [AHReach reachForDefaultHost];
 	[defaultHostReach startUpdatingWithBlock:^(AHReach *reach) {
-		[self updateAvailabilityField:self.defaultHostField withRoutes:reach];
+		[self updateAvailabilityField:self.defaultHostField withReach:reach];
 	}];
-	[self updateAvailabilityField:self.defaultHostField withRoutes:defaultHostReach];
+	[self updateAvailabilityField:self.defaultHostField withReach:defaultHostReach];
 	
 	AHReach *hostReach = [AHReach reachForHost:@"auerhaus.com"];
 	[hostReach startUpdatingWithBlock:^(AHReach *reach) {
-		[self updateAvailabilityField:self.hostField withRoutes:reach];
+		[self updateAvailabilityField:self.hostField withReach:reach];
 	}];
-	[self updateAvailabilityField:self.hostField withRoutes:hostReach];
+	[self updateAvailabilityField:self.hostField withReach:hostReach];
 
 	struct sockaddr_in addr;
 	memset(&addr, 0, sizeof(struct sockaddr_in));
@@ -64,9 +64,9 @@
 
 	AHReach *addressReach = [AHReach reachForAddress:&addr];
 	[addressReach startUpdatingWithBlock:^(AHReach *reach) {
-		[self updateAvailabilityField:self.addressField withRoutes:reach];
+		[self updateAvailabilityField:self.addressField withReach:reach];
 	}];
-	[self updateAvailabilityField:self.addressField withRoutes:addressReach];
+	[self updateAvailabilityField:self.addressField withReach:addressReach];
 	
 	self.reaches = [NSArray arrayWithObjects:defaultHostReach, hostReach, addressReach, nil];
 }
@@ -75,14 +75,14 @@
 	return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
 }
 
-- (void)updateAvailabilityField:(UITextField *)field withRoutes:(AHReach *)reach {
+- (void)updateAvailabilityField:(UITextField *)field withReach:(AHReach *)reach {
 	field.text = @"Not reachable";
 	
-	if([reach reachableViaWWAN]) {
+	if([reach isReachableViaWWAN]) {
 		field.text = @"Available via WWAN";
 	}
 	
-	if([reach reachableViaWifi]) {
+	if([reach isReachableViaWiFi]) {
 		field.text = @"Available via WiFi";
 	}
 }

@@ -17,8 +17,8 @@ You can incorporate AHReach into your project by copy-pasting `AHReach.h` and `A
 ### How to detect if the default host is reachable via any interface
 
 	AHReach *defaultHostReach = [AHReach reachForDefaultHost];
-	[defaultHostReach startUpdatingWithBlock:^(AHReachRoutes availableRoutes) {
-		if(availableRoutes != AHReachRouteNone)
+	[defaultHostReach startUpdatingWithBlock:^(AHReach *reach) {
+		if([reach isReachable])
 			NSLog(@"Can reach default host");
 	}];
 	
@@ -32,11 +32,9 @@ You can incorporate AHReach into your project by copy-pasting `AHReach.h` and `A
 	inet_aton("173.194.43.0", &addr.sin_addr);
 
 	AHReach *addressReach = [AHReach reachForAddress:&addr];
-	[addressReach startUpdatingWithBlock:^(AHReachRoutes availableRoutes) {
-		if(availableRoutes & AHReachRouteWiFi)
+	[addressReach startUpdatingWithBlock:^(AHReach *reach) {
+		if([reach isReachableViaWiFi])
 			NSLog(@"Can reach Google via WiFi");
 	}];
-
-You can synchronously check the available routes on any reach object with the `availableRoutes` method.
 
 See the sample project for more examples.
