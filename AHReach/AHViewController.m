@@ -44,16 +44,16 @@
 	addressField.text = @"<No updates yet>";
 	
 	AHReach *defaultHostReach = [AHReach reachForDefaultHost];
-	[defaultHostReach startUpdatingWithBlock:^(AHReachRoutes availableRoutes) {
-		[self updateAvailabilityField:self.defaultHostField withRoutes:availableRoutes];
+	[defaultHostReach startUpdatingWithBlock:^(AHReach *reach) {
+		[self updateAvailabilityField:self.defaultHostField withRoutes:reach];
 	}];
-	[self updateAvailabilityField:self.defaultHostField withRoutes:[defaultHostReach availableRoutes]];
+	[self updateAvailabilityField:self.defaultHostField withRoutes:defaultHostReach];
 	
 	AHReach *hostReach = [AHReach reachForHost:@"auerhaus.com"];
-	[hostReach startUpdatingWithBlock:^(AHReachRoutes availableRoutes) {
-		[self updateAvailabilityField:self.hostField withRoutes:availableRoutes];
+	[hostReach startUpdatingWithBlock:^(AHReach *reach) {
+		[self updateAvailabilityField:self.hostField withRoutes:reach];
 	}];
-	[self updateAvailabilityField:self.hostField withRoutes:[hostReach availableRoutes]];
+	[self updateAvailabilityField:self.hostField withRoutes:hostReach];
 
 	struct sockaddr_in addr;
 	memset(&addr, 0, sizeof(struct sockaddr_in));
@@ -63,10 +63,10 @@
 	inet_aton("173.194.43.0", &addr.sin_addr);
 
 	AHReach *addressReach = [AHReach reachForAddress:&addr];
-	[addressReach startUpdatingWithBlock:^(AHReachRoutes availableRoutes) {
-		[self updateAvailabilityField:self.addressField withRoutes:availableRoutes];
+	[addressReach startUpdatingWithBlock:^(AHReach *reach) {
+		[self updateAvailabilityField:self.addressField withRoutes:reach];
 	}];
-	[self updateAvailabilityField:self.addressField withRoutes:[addressReach availableRoutes]];
+	[self updateAvailabilityField:self.addressField withRoutes:addressReach];
 	
 	self.reaches = [NSArray arrayWithObjects:defaultHostReach, hostReach, addressReach, nil];
 }
@@ -75,14 +75,16 @@
 	return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
 }
 
-- (void)updateAvailabilityField:(UITextField *)field withRoutes:(AHReachRoutes)routes {
+- (void)updateAvailabilityField:(UITextField *)field withRoutes:(AHReach *)reach {
 	field.text = @"Not reachable";
 	
-	if(routes & AHReachRouteWWAN)
+	if([reach reachableViaWWAN]) {
 		field.text = @"Available via WWAN";
+	}
 	
-	if(routes & AHReachRouteWiFi)
+	if([reach reachableViaWifi]) {
 		field.text = @"Available via WiFi";
+	}
 }
 
 @end

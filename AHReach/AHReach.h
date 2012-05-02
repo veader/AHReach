@@ -35,7 +35,8 @@ enum {
 };
 typedef NSInteger AHReachRoutes;
 
-typedef void (^AHReachChangedBlock)(AHReachRoutes availableRoutes);
+@class AHReach; // ugh, hate having to do this. chicken-n-egg problem.
+typedef void (^AHReachChangedBlock)(AHReach *reach);
 
 @interface AHReach : NSObject
 
@@ -46,5 +47,9 @@ typedef void (^AHReachChangedBlock)(AHReachRoutes availableRoutes);
 - (AHReachRoutes)availableRoutes;
 - (void)startUpdatingWithBlock:(AHReachChangedBlock)changedBlock;
 - (void)stopUpdating;
+
+- (BOOL)notReachable;
+- (BOOL)reachableViaWifi;
+- (BOOL)reachableViaWWAN;
 
 @end

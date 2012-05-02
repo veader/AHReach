@@ -82,8 +82,7 @@ void AHReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabili
 	SCNetworkReachabilityFlags flags = 0;
 	SCNetworkReachabilityGetFlags(self.reachability, &flags);
 	
-	if(flags & kSCNetworkReachabilityFlagsReachable)
-	{
+	if(flags & kSCNetworkReachabilityFlagsReachable) {
 		// Since WWAN is likely to require a connection, we initially assume a route with no connection required is WiFi
 		if(!(flags & kSCNetworkReachabilityFlagsConnectionRequired)) {
 			routes |= AHReachRouteWiFi;
@@ -119,8 +118,9 @@ void AHReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabili
 }
 
 - (void)reachabilityDidChange {
-	if(self.changedBlock)
-		self.changedBlock([self availableRoutes]);
+	if(self.changedBlock) {
+		self.changedBlock(self);
+	}
 }
 
 - (void)stopUpdating {
@@ -131,6 +131,19 @@ void AHReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabili
 		SCNetworkReachabilitySetCallback(self.reachability, NULL, NULL);
 	}
 }
+
+- (BOOL)notReachable {
+	return ([self availableRoutes] & AHReachRouteNone);
+}
+
+- (BOOL)reachableViaWifi {
+	return ([self availableRoutes] & AHReachRouteWiFi);
+}
+
+- (BOOL)reachableViaWWAN {
+	return ([self availableRoutes] & AHReachRouteWWAN);
+}
+
 
 @end
 
